@@ -29,7 +29,7 @@ def createRecordsTable(myCursor):
     #this ^ line may be removed if we specify a "database" parameter in mariadb.connect()
     
     myCursor.execute(
-        "CREATE TABLE IF NOT EXISTS `records` (`id` bigint(20) UNSIGNED NOT NULL,`created_at` timestamp NULL DEFAULT NULL,`updated_at` timestamp NULL DEFAULT NULL,`rfid` int(11) NOT NULL,`temperature` double(8,2) NOT NULL,`timestamp` datetime NOT NULL,`gate` int(11) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        "CREATE TABLE IF NOT EXISTS `records` (`id` bigint(20) UNSIGNED NOT NULL,`created_at` timestamp NULL DEFAULT NULL,`updated_at` timestamp NULL DEFAULT NULL,`rfid` bigint(20) NOT NULL,`temperature` double(8,2) NOT NULL,`timestamp` datetime NOT NULL,`gate` int(11) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
         #person_id, time, date & gate should altogether make a composite key, but that doesn't have any use at the moment        
     )
     
