@@ -29,7 +29,7 @@ def createRecordsTable(myCursor):
     #this ^ line may be removed if we specify a "database" parameter in mariadb.connect()
     
     myCursor.execute(
-        "CREATE TABLE IF NOT EXISTS `records` (`id` bigint(20) UNSIGNED NOT NULL,`created_at` timestamp NULL DEFAULT NULL,`updated_at` timestamp NULL DEFAULT NULL,`person_id` int(11) NOT NULL,`temperature` double(8,2) NOT NULL,`timestamp` datetime NOT NULL,`gate` int(11) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        "CREATE TABLE IF NOT EXISTS `records` (`id` bigint(20) UNSIGNED NOT NULL,`created_at` timestamp NULL DEFAULT NULL,`updated_at` timestamp NULL DEFAULT NULL,`rfid` int(11) NOT NULL,`temperature` double(8,2) NOT NULL,`timestamp` datetime NOT NULL,`gate` int(11) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
         #person_id, time, date & gate should altogether make a composite key, but that doesn't have any use at the moment        
     )
     
@@ -46,10 +46,10 @@ def createRecordsTable(myCursor):
 
 def addRecord(myCursor, person_id, temperature, timestamp, gate):
     createRecordsTable(myCursor)
-    print('person_id:{0}\ntemperature:{1}\ntimestamp:{2}\ngate:{3}'.format(person_id, temperature, timestamp, gate))
+    print('RFID:{0}\ntemperature:{1}\ntimestamp:{2}\ngate:{3}'.format(person_id, temperature, timestamp, gate))
     myCursor.execute(
         #f"SELECT person_id FROM `records` WHERE `person_id`={person_id} AND `date`='{date}' AND TIMEDIFF('{time}',`time`) <= '00:00:30'"
-        f"SELECT person_id FROM `records` WHERE `person_id`={person_id} AND TIMESTAMPDIFF(SECOND,`timestamp`,'{timestamp}') <= '30' AND TIMESTAMPDIFF(SECOND,`timestamp`,'{timestamp}') > '0'"
+        f"SELECT rfid FROM `records` WHERE `rfid`={person_id} AND TIMESTAMPDIFF(SECOND,`timestamp`,'{timestamp}') <= '30' AND TIMESTAMPDIFF(SECOND,`timestamp`,'{timestamp}') > '0'"
         #this ^ line either returns a single row, otherwise empty row
     )
 
@@ -62,12 +62,12 @@ def addRecord(myCursor, person_id, temperature, timestamp, gate):
     if(not redundant):
         myCursor.execute(
             #f"INSERT INTO `records` VALUES ('{person_id}', '{temperature}', '{time}', '{date}', '{gate}')"
-            f"INSERT INTO `records` (`created_at`, `updated_at`, `person_id`, `temperature`, `timestamp`, `gate`) VALUES (CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{person_id}', '{temperature}', '{timestamp}', '{gate}')"
+            f"INSERT INTO `records` (`created_at`, `updated_at`, `rfid`, `temperature`, `timestamp`, `gate`) VALUES (CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'{person_id}', '{temperature}', '{timestamp}', '{gate}')"
         )
     else:
         myCursor.execute(
             #f"UPDATE `records` SET `temperature`='{temperature}', `time`='{time}' WHERE `person_id`={person_id} AND `date`='{date}' AND TIMEDIFF('{time}',`time`) <= '00:00:30'"
-            f"UPDATE `records` SET `updated_at`=CURRENT_TIMESTAMP, `temperature`='{temperature}', `timestamp`='{timestamp}' WHERE `person_id`={person_id} AND TIMESTAMPDIFF(SECOND,`timestamp`,'{timestamp}') <= '30' AND TIMESTAMPDIFF(SECOND,`timestamp`,'{timestamp}') > '30'"
+            f"UPDATE `records` SET `updated_at`=CURRENT_TIMESTAMP, `temperature`='{temperature}', `timestamp`='{timestamp}' WHERE `rfid`={person_id} AND TIMESTAMPDIFF(SECOND,`timestamp`,'{timestamp}') <= '30' AND TIMESTAMPDIFF(SECOND,`timestamp`,'{timestamp}') > '30'"
         ) 
 
 if __name__ == "__main__":
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     
     args=parser.parse_args()
 
-    person_id = args.id
+    person_id = args.id #this id is actually rfid
     temperature = args.temperature
     #today_date, current_time = datetime.utcfromtimestamp(int(args.timestamp)).strftime("%Y-%m-%d %H:%M:%S").split(" ")
     timestamp = datetime.utcfromtimestamp(int(args.timestamp)).strftime("%Y-%m-%d %H:%M:%S")
